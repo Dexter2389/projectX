@@ -1,3 +1,4 @@
+import os
 from scipy.spatial import distance
 from imutils import face_utils
 import imutils
@@ -10,9 +11,13 @@ def eye_aspect_ratio(eye):
 	C = distance.euclidean(eye[0], eye[3])
 	eye_ar = (A + B) / (2.0 * C)
 	return eye_ar
-	
+
+def play_beep(duration=0.001, freq=440):
+	os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+	print("playing beep")
+
 thresh = 0.225
-frame_check = 20
+frame_check = 17
 detect = dlib.get_frontal_face_detector()
 predict = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat") # Dat file is the crux of the code
 
@@ -35,15 +40,14 @@ while True:
 		eye_ar = (leftEAR + rightEAR) / 2.0
 		leftEyeHull = cv2.convexHull(leftEye)
 		rightEyeHull = cv2.convexHull(rightEye)
-		cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-		cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+		cv2.drawContours(frame, [leftEyeHull], -1, (255, 128, 0), 1)
+		cv2.drawContours(frame, [rightEyeHull], -1, (255, 128, 0), 1)
 		if eye_ar < thresh:
 			flag += 1
 			print (flag)
 			if flag >= frame_check:
-				cv2.putText(frame, "****************ALERT!****************", (10,325),
-					cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-				print ("Drowsy")
+				cv2.putText(frame, "     ALERT! Wait are you sleeping?? ", (10,325), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+				play_beep(0.075, 440)
 		else:
 			flag = 0
 	cv2.imshow("Frame", frame)
